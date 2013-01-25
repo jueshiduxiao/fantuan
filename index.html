@@ -1,0 +1,435 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta content="width=device-width; initial-scale=1.0,maximum-scale=1.0,user-scalable=no;" name="viewport" />
+<title>饭团记账</title>
+<link rel="stylesheet" type="text/css" charset="utf-8" href="css/reset.css" />
+<link rel="stylesheet" type="text/css" charset="utf-8" href="css/global.css" />
+<link rel="stylesheet" type="text/css" charset="utf-8" href="css/fantuan.css" />
+</head>
+<body>
+<div id="body">
+    <div id="wrapper" class="wrapper">
+        <div class="scene backward">正在加载。。。</div>
+        <div class="scene forward">正在加载。。。</div>
+    </div>
+</div>
+
+<div id="tmpls" class="hidden">
+<!-- *********************************************************************** -->
+<textarea id="tmpl-login">
+<div id="login" class="mod">
+    <div class="hd">
+        <h1 class="logo">饭团记账</h1>
+    </div>
+    <div class="bd">
+        <div class="rows">
+            <span>账户：</span>
+            <input class="textbox" node-type="name" type="text" placeholder="输入ldap账号" value="" />
+        </div>
+        <div class="rows">
+            <span>密码：</span>
+            <input class="textbox" node-type="pwd" type="password" value="" />
+        </div>
+        <div class="rows">
+            <div class="tips col-red" node-type="tip">X 用户名密码错误</div>
+        </div>
+    </div>
+    <div class="ft">
+        <input class="button-blue" node-type="login" type="button" value="登录" />
+    </div>
+</div>
+</textarea>
+<!-- *********************************************************************** -->
+<textarea id="tmpl-index">
+<div id="index" class="mod">
+    <div class="hd">
+        <fragment data-tmpl="header" />
+    </div>
+    <div class="bd">
+        <div class="info">
+            <div class="rows">
+                hi, <span>{{= sessionUser}}</span> 你好!
+                <a href="javascript: void(0)" class="logout" node-type="login-out">退出登录</a>
+            </div>
+            {{if summary }}
+            {{if summary.group_count === 0}}
+            <div class="rows">
+                你现在还没有开始混饭团
+            </div>
+            <div class="rows">
+                当前支付消费余额为：0元。
+            </div>
+            {{else}}
+            <div class="rows">
+                你现在混在${summary.group_count}个饭团
+            </div>
+            <div class="rows">
+                当前支付消费余额为：${summary.total_account}元。
+            </div>
+            <div class="rows">
+                <a href="javascript: void(0)" class="bill-detail" node-type="bill-detail">账单详情</a>
+                <a href="javascript: void(0)" class="new-group" node-type="create-fantuan">创建饭团</a>
+            </div>
+            {{/if}}
+            {{/if}}
+        </div>
+    </div>
+    <div class="ft">
+        {{if summary }}
+        {{if summary.group_count === 0}}
+        <input class="button-blue" node-type="create-fantuan" type="button" value="创建饭团" />
+        {{else}}
+        <input class="button-blue" node-type="create-bill" type="button" value="记一次账" />
+        <div class="tips">* 只能记你自己付款的饭团账喔！</div>
+        <div class="fantuan-info">
+            <span class="title">所在饭团</span>
+            <ul>
+                {{each groups}}
+                <li>
+                    <div class="rows row0">
+                        ${$value.group.name}（${$value.group.count}人）
+                    </div>
+                    <div class="rows row1">
+                        你在的饭团余额：${$value.group.user_account}元
+                    </div>
+                    <div class="rows">
+                        <a href="javascript: void(0)" class="modify-member" node-type="add-member" 
+                            data-id="${$value.group.id}" data-name="${$value.group.name}">添减成员</a>
+                        <a href="javascript: void(0)" class="debt-list" node-type="view-debt-list" 
+                            data-id="${$value.group.id}" data-name="${$value.group.name}">饭团负债排名</a>
+                    </div>
+                </li>
+                {{/each}}
+            </ul>
+        </div>
+        {{/if}}
+        {{/if}}
+    </div>
+</div>
+</textarea>
+<!-- *********************************************************************** -->
+<textarea id="tmpl-header">
+<div class="fragment header">
+    {{if pageId === 'bill-detail' || pageId === 'debt-list'}}
+    <a class="home" node-type="home" href="javascript:void(0)">home</a>
+    {{/if}}
+    {{if pageId === 'bill-item'}}
+    <a class="home" node-type="bill-detail" href="javascript:void(0)">home</a>
+    {{/if}}
+    <h1 class="logo">饭团记账</h1>
+    {{if pageId === 'index'}}
+    <a class="refresh" node-type="refresh" href="javascript:void(0)">refesh</a>
+    {{/if}}
+</div>
+</textarea>
+<!-- *********************************************************************** -->
+<textarea id="tmpl-create-fantuan">
+<div id="createFantuan" class="mod">
+    <div class="hd">
+        <fragment data-tmpl="header" />
+    </div>
+    <div class="bd">
+        <span class="title">创建一个新饭团</span>
+        <div class="rows">
+            饭团名称：
+            <input class="textbox" type="text" node-type="name" />
+        </div>
+        <div class="rows">
+            <div class="tips tip-no col-red hidden" node-type="tip">X 该名称已被占用</div>
+        </div>
+        <div class="rows">
+            <div class="tips col-grey">* 创建后，饭团名称不能修改</div>
+        </div>
+    </div>
+    <div class="ft">
+        <input class="button-grey-short" node-type="create" type="button" value="创建" />
+        <input class="button-grey-short" node-type="cancel" type="button" value="取消" />
+    </div>
+</div>
+</textarea>
+<!-- *********************************************************************** -->
+<textarea id="tmpl-modify-fantuan">
+<div id="modifyFantuan" class="mod">
+    <div class="hd">
+        <fragment data-tmpl="header" />
+    </div>
+    <div class="bd">
+        <span class="title">修改饭团成员信息</span>
+        <div class="rows">
+            饭团名称：
+            {{if group}}
+            <b>${group.name}</b>
+            {{/if}}
+        </div>
+        <div class="rows suggest">
+            添加成员：
+            <input class="textbox" node-type="member" type="text" />
+            <ul node-type="suggest" data-group-id="${group.id}">
+                <li class="hidden" node-type="add-member" data-id="-1">demo</li>
+            </ul>
+        </div>
+        <div class="rows hidden">
+            待添加成员（可点击取消）：
+            <div class="members" node-type="plan-members">
+                <span class="member selected" node-type="cancel-member" data-value="-1">demo</span>
+            </div>
+        </div>
+        <div class="rows">
+            已有成员：
+            <div class="members">
+                {{if users}}
+                    {{each users}}
+                    <span class="member" data-value="${$value.user.id}">${$value.user.name}</span>
+                    {{/each}}
+                {{/if}}
+            </div>
+        </div>
+    </div>
+    <div class="ft">
+        <input class="button-blue-short" node-type="save" 
+            {{if group}}
+            data-id="${group.id}"
+            {{/if}}
+            type="button" value="保存" />
+        <input class="button-grey-short" node-type="cancel" type="button" value="取消" />
+    </div>
+</div>
+</textarea>
+<!-- *********************************************************************** -->
+<textarea id="tmpl-bill">
+<div id="bill" class="mod">
+    <div class="hd">
+        <fragment data-tmpl="header" />
+    </div>
+    <div class="bd">
+        <span class="title">记一次账</span>
+        <div class="rows">
+            饭团：
+            <select class="select" node-type="fantuan"
+                {{if event_id}} disabled {{/if}} >
+                {{if groups}}
+                {{each groups}}
+                <option value="${$value.group.id}" {{if $value.group._selected}} selected{{/if}}>${$value.group.name}</option>
+                {{/each}}
+                {{else}}
+                <option value="-1">--请选择饭团--</option>
+                {{/if}}
+            </select>
+        </div>
+        <div class="rows">
+            时间：
+            <select class="select" node-type="date">
+                {{if date}}
+                {{each date}}
+                <option value="{{= $value.value}}" {{if $value.selected}} selected{{/if}}>{{= $value.value}}</option>
+                {{/each}}
+                {{else}}
+                <option value="-1">--请选择日期--</option>
+                {{/if}}
+            </select>
+        </div>
+        <div class="rows">
+            事件：
+            <select class="select" node-type="event-types">
+                {{if event_types}}
+                {{each event_types}}
+                <option value="${$value.event_type.id}" {{if $value.event_type._selected}} selected{{/if}}>${$value.event_type.name}</option>
+                {{/each}}
+                {{else}}
+                <option value="-1">--请选择事件--</option>
+                {{/if}}
+            </select>
+        </div>
+        <div class="rows">
+            地点：
+            <select class="select" node-type="places">
+                {{if places}}
+                {{each places}}
+                <option value="${$value.place.id}" {{if $value.place._selected}} selected{{/if}}>${$value.place.name}</option>
+                {{/each}}
+                {{else}}
+                <option value="-1">--请选择事件--</option>
+                {{/if}}
+            </select>
+        </div>
+        <div class="rows">
+            金额：
+            <input class="textbox" node-type="account" type="number" value="{{= pay}}" />
+        </div>
+        <div class="rows">
+            付款人：
+            <span>{{= pay_user}}（只能付款人记账）</span>
+        </div>
+        {{if group_users}}
+        <div class="rows" node-type="member-panel">
+            参团人：共<span node-type="member-count">${selectedCount}</span>人（请点选下面参团人喔！）
+            <div class="members">
+                <span class="member" node-type="member-btn" data-value="-1" style='display: none;'>demo</span>
+                {{each group_users}}
+                <span node-type="member-btn" data-value="${$value.user.id}"
+                {{if selectedUserMap}}
+                    {{if selectedUserMap[$value.user.id]}}
+                    class="member selected"
+                    {{else}}
+                    class="member"
+                    {{/if}}
+                {{else}}
+                class="member"
+                {{/if}}
+                >${$value.user.name}</span>
+                {{/each}}
+            </div>
+        </div>
+        {{/if}}
+    </div>
+    <div class="ft">
+        <input class="button-blue-short" node-type="save" data-id="{{= event_id}}" type="button" value="保存" />
+        <input class="button-grey-short" node-type="cancel" type="button" value="取消" />
+    </div>
+</div>
+</textarea>
+<!-- *********************************************************************** -->
+<textarea id="tmpl-bill-detail">
+<div id="billDetail" class="mod">
+    <div class="hd">
+        <fragment data-tmpl="header" />
+    </div>
+    <div class="bd">
+        <div>
+            <span class="title">{{= sessionUser}}</span>
+            的饭团账单详情
+        </div>
+        <div class="bills">
+            {{each groups}}
+            <div class="summary clearfix">
+                <span class="group-name">{{= $value.groupName}}</span>
+                <span class="balance">饭团余额：{{= $value.groupBalance}}</span>
+            </div>
+            <ul>
+                {{each $value.events}}
+                <li node-type="item" data-id="{{= $value.eventId}}">
+                    <div class="rows row1">
+                        {{= $value.date}}（{{= $value.day}}）
+                        {{= $value.eventTypeName}}
+                        {{= $value.placeName}}
+                    </div>
+                    <div class="rows row2">
+                        {{= $value.userCount}}人，人均{{= $value.avgPay}}
+                        {{if $value.pay > 0}}
+                        ，<span style="color: #FF9900">我付款</span>
+                        {{/if}}
+                    </div>
+                    <div class="rows row3">
+                        {{= $value.pay}} >
+                    </div>
+                </li>
+                {{/each}}
+            </ul>
+            {{/each}}
+        </div>
+    </div>
+    <div class="ft"></div>
+</div>
+</textarea>
+<!-- *********************************************************************** -->
+<textarea id="tmpl-bill-item">
+<div id="billItem" class="mod">
+    <div class="hd">
+        <fragment data-tmpl="header" />
+    </div>
+    <div class="bd">
+        <span class="title">账单详情</span>
+        <div class="rows">
+            饭团：<span class="value">{{= groupName}}</span>
+        </div>
+        <div class="rows">
+            时间：<span class="value">{{= date}}</span>
+        </div>
+        <div class="rows">
+            事件：<span class="value">{{= eventTypeName}}</span>
+        </div>
+        <div class="rows">
+            地点：<span class="value">{{= placeName}}</span>
+        </div>
+        <div class="rows">
+            金额：<span class="value">{{= pay}}</span>
+        </div>
+        <div class="rows">
+            付款人：
+            <span class="value1">{{= payUserName}}</span>
+        </div>
+        <div class="rows">
+            参团人：<span class="value1">共{{= usersCount}}人，人均{{= avgPay}}元</span>
+            <div class="members">（
+                {{each users}}
+                {{if $index !== 0}},{{/if}}
+                <span class="member">{{= $value.name}}</span>
+                {{/each}}
+            ）</div>
+        </div>
+        <div class="rows rows1">
+            你在该饭团的余额：{{= groupBalance}}元
+        </div>
+    </div>
+    <div class="ft">
+        <input class="back-home" node-type="back" type="button" value="返回" />
+        {{if isEnableModify}}
+        <input class="modify-bill" node-type="modify" data-event-id="{{= eventId}}" type="button" value="修改" />
+        {{/if}}
+    </div>
+</div>
+</textarea>
+<!-- *********************************************************************** -->
+<textarea id="tmpl-debt-list">
+<div id="debtList" class="mod">
+    <div class="hd">
+        <fragment data-tmpl="header" />
+    </div>
+    <div class="bd">
+        {{if group}}
+        <div class="summary">
+            <span>{{= group.name}}</span>
+            欠钱排行榜
+        </div>
+        {{/if}}
+        <ul>
+        {{each items}}
+        <li>
+            <span class="num">{{= $index + 1}}.</span>
+            <span class="name">{{= $value.user.user.name}}.</span>
+            <span class="balance {{if $value.balance < 0}}col-red{{/if}}">{{= $value.balance}}元</span>
+        </li>
+        {{/each}}
+    </ul>
+    </div>
+    <div class="ft"></div>
+</div>
+</textarea>
+<!-- *********************************************************************** -->
+</div>
+
+<script type="text/javascript" charset="utf-8" src="script/jquery.js"></script>
+<script type="text/javascript" charset="utf-8" src="script/jquery.tmpl.js"></script>
+<script type="text/javascript" charset="utf-8" src="script/sea.js"></script>
+<script type="text/javascript">
+seajs.config({
+    charset: 'utf-8',
+    timeout: 20000,
+    debug: 2
+});
+seajs.use([
+    './script/mod/app',
+    './script/mod/login',
+    './script/mod/index',
+    './script/mod/header',
+    './script/mod/create.fantuan',
+    './script/mod/modify.fantuan',
+    './script/mod/bill',
+    './script/mod/bill.detail',
+    './script/mod/bill.item'
+]);
+</script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+/**
+ * global.css
+ * version: 0.1
+ * author: liangxiao
+ */
+
+html{
+    overflow-y:scroll;
+}
+body{
+    font-size:12px;
+    line-height:20px;
+    font-family:Arial,Verdana;
+    color:#333333;
+}
+
+/* 清除浮动 */
+.clearfix:after{
+    content:'.';
+    display:block;
+    visibility:hidden;
+    height:0;
+    line-height:0;
+    font-size:0;
+    clear:both;
+}
+.clearfix{zoom:1;}
+.clear{clear:both;}
