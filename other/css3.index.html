@@ -1,0 +1,71 @@
+<link rel="stylesheet" type="text/css" charset="utf-8"
+    href="http://nec.netease.com/download/framework/animation.css" />
+<style type="text/css">
+    #wrapper {
+        width: 320px;
+        height: 480px;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+    #view-wrapper {
+        width: 980px;
+        position: absolute;
+        left: -320px;
+    }
+    .view {
+        float: left;
+        width: 320px;
+        min-height: 480px;
+    }
+
+    .wrapper-slidein {
+        -moz-animation-duration: 300ms;
+        -webkit-animation-duration: 300ms;
+        -moz-animation-name: slidein;
+        -webkit-animation-name: slidein;
+        -moz-animation-fill-mode: forwards;
+        -webkit-animation-fill-mode: forwards;
+        -moz-animation-timing-function: ease-out;
+        -webkit-animation-timing-function: ease-out;
+    }
+    @-moz-keyframes slidein {
+        from {
+            left: -320px;
+        }
+        to {
+            left: -640px;
+        }
+    }
+    @-webkit-keyframes slidein {
+        from {
+            left: -320px;
+        }
+        to {
+            left: -640px;
+        }
+    }
+    @-moz-keyframes slideout {
+        from {
+            left: 0;
+        }
+        to {
+            left: -320px;
+        }
+    }
+    @-webkit-keyframes slideout {
+        from {
+            left: 0;
+        }
+        to {
+            left: -320px;
+        }
+    }
+</style>
+
+<div id="wrapper" class="wrapper">
+    <div id="view-wrapper">
+        <div class="view">正在加0载...</div>
+        <div class="view current">正在加1载...</div>
+        <div class="view">正在加2载...</div>
+    </div>
+</div>
